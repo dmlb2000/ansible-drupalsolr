@@ -1,0 +1,3 @@
+---
+- src: pacifica.ansible_drupalvm
+  version: v0.1.0

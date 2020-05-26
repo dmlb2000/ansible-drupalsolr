@@ -28,9 +28,12 @@ galaxy_info:
   # https://galaxy.ansible.com/api/v1/platforms/
   #
   platforms:
-    - name: RH
+    - name: EL
       versions:
         - 8
+    - name: Ubuntu
+      versions:
+        - bionic
 
   galaxy_tags: []
     # List tags for your role here, one per line. A tag is a keyword that describes
