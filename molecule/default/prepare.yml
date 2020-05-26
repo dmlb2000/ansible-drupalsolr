@@ -1,0 +1,39 @@
+---
+- name: Prepare the host
+  hosts: all
+  vars:
+    drupalvm_config:
+      hostname_configure: false
+      firewall_enabled: false
+      drupal_build_makefile: false
+      installed_extras:
+        - drupalconsole
+        - drush
+        - solr
+      extra_packages:
+        - rsync
+        - sqlite
+      solr_version: "7.7.2"
+      drupal_composer_dependencies:
+        - "drupal/search_api_solr"
+      drupal_enable_modules:
+        - "search_api_solr_defaults"
+    drupalvm_version: 5.2.0
+    drupalvm_dir: "/etc/ansible/drupal-vm-{{ drupalvm_version }}"
+  pre_tasks:
+    - name: Fix Hosts file for Postfix
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^::1'
+        state: absent
+        unsafe_writes: yes
+  roles:
+    - { role: pacifica.ansible_drupalvm }
+  post_tasks:
+    - name: Create DrupalVM Config
+      copy:
+        content: "{{ drupalvm_config | to_nice_yaml }}"
+        dest: "{{ drupalvm_dir }}/local.config.yml"
+    - name: Run DrupalVM Playbook
+      command: ansible-playbook "/etc/ansible/drupal-vm-{{ drupalvm_version }}/provisioning/playbook.yml"
+      changed_when: false

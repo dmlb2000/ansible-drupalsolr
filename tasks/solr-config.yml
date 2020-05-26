@@ -1,0 +1,40 @@
+---
+- name: Build Solr Data Structure
+  set_fact:
+    __solr_obj:
+      core_name: "{{ item.split(':')[2].strip() }}"
+      server_name: "{{ item.split(':')[0].split('.')[2] }}"
+  register: solr_core_objs
+  loop:
+    "{{ solr_server_core_result.results | map(attribute='stdout_lines') | list | flatten }}"
+- name: Set Solr Object
+  set_fact:
+    solr_server_cores: "{{ solr_core_objs.results | map(attribute='ansible_facts.__solr_obj') | list }}"
+- name: Create Solr Server Configs
+  shell: |
+    set -o pipefail
+    echo y | drush --root={{ drupal_site_dir }} \
+        solr-gsc {{ item.server_name }} \
+        {{ temp_solr_config_dir }}/solr-config-{{ item.core_name }}.zip
+  args:
+    creates: "{{ temp_solr_config_dir }}/solr-config-{{ item.core_name }}.zip"
+    executable: /bin/bash
+  notify:
+    - Unpack Solr Config
+  loop: "{{ solr_server_cores }}"
+- name: Make Solr Config Directory
+  file:
+    path: "{{ temp_solr_config_dir }}/solr-config-{{ item.core_name }}"
+    state: directory
+  loop: "{{ solr_server_cores }}"
+- meta: flush_handlers
+- name: Create Solr Core from Directory
+  become: true
+  become_user: solr
+  command: "{{ solr_install_dir }}/bin/solr create -c {{ item.core_name }} -d {{ temp_solr_config_dir }}/solr-config-{{ item.core_name }}"
+  args:
+    creates: "{{ solr_data_dir }}/{{ item.core_name }}"
+  notify:
+    - Clear Index and Field Types
+  loop: "{{ solr_server_cores }}"
+- meta: flush_handlers

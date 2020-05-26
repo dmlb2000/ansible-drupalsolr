@@ -1,0 +1,13 @@
+---
+- name: Check Composer File
+  slurp:
+    src: "{{ drupal_site_dir }}/composer.json"
+  register: composer_file_result
+- name: Fix Solr API
+  command:
+    cmd: "composer {{ item }}"
+    chdir: "{{ drupal_site_dir }}"
+  loop:
+    - "require \"symfony/event-dispatcher:v4.3.11 as v3.4.35\""
+    - update
+  when: "'v4.3.11 as v3.4.35' not in ( composer_file_result['content'] | b64decode )"

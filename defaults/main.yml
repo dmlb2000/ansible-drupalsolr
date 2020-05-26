@@ -1,0 +1,5 @@
+---
+drupal_site_dir: /var/www/drupalvm/drupal
+solr_install_dir: /opt/solr
+solr_data_dir: /var/solr/data
+temp_solr_config_dir: /var/tmp

@@ -1,0 +1,10 @@
+---
+- name: Get All The Servers
+  command: "drush --root={{ drupal_site_dir }} config:status --filter='search_api.server' --field=name"
+  register: all_solr_servers_result
+  changed_when: false
+- name: Check for Solr Server Core Name
+  command: "drush --root={{ drupal_site_dir }} cget {{ item }} backend_config.connector_config.core"
+  register: solr_server_core_result
+  loop: "{{ all_solr_servers_result.stdout_lines }}"
+  changed_when: false

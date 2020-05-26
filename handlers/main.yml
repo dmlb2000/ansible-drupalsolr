@@ -1,0 +1,18 @@
+---
+- name: Unpack Solr Config
+  unarchive:
+    src: "{{ temp_solr_config_dir }}/solr-config-{{ item.core_name }}.zip"
+    dest: "{{ temp_solr_config_dir }}/solr-config-{{ item.core_name }}"
+    remote_src: true
+  loop: "{{ solr_server_cores }}"
+- name: Clear Index and Field Types
+  shell: |
+    set -o pipefail
+    echo y | drush --root={{ drupal_site_dir }} {{ item }}
+  args:
+    executable: /bin/bash
+  changed_when: False
+  loop:
+    - 'search-api-reindex'
+    - 'search-api-solr-delete-and-reinstall-all-field-types'
+    - 'search-api:clear'
