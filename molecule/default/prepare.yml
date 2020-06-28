@@ -15,6 +15,7 @@
       solr_version: "7.7.2"
       drupal_composer_project_package: drupal/recommended-project:^8
       drupal_composer_dependencies:
+        - '"symfony/event-dispatcher:4.3.11 as 3.4.41"'
         - 'drush/drush:^9'
         - 'drupal/search_api_solr'
       drupal_enable_modules:
